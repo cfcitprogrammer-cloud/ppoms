@@ -25,7 +25,7 @@ export default function CantonProduction() {
     console.log(data);
 
     try {
-      const res = await axios.post(
+      await axios.post(
         GAS_DEPLOYMENT_LINK,
         JSON.stringify({
           action: "set-canton-prod",

@@ -30,7 +30,7 @@ export default function BihonProduction() {
     setLoading(true);
 
     try {
-      const res = await axios.post(
+      await axios.post(
         GAS_DEPLOYMENT_LINK,
         JSON.stringify({
           action: "set-bihon-prod",
@@ -69,12 +69,12 @@ export default function BihonProduction() {
   const sweepings = values.sweepings || 0;
   const totalRejects = trimmings + rejects + sweepings;
 
-  const invertingMinutes = (values.ipHours || 0) * 60 + (values.ipMinutes || 0);
+  // const invertingMinutes = (values.ipHours || 0) * 60 + (values.ipMinutes || 0);
 
-  const changingMinutes = (values.cpHours || 0) * 60 + (values.cpMinutes || 0);
+  // const changingMinutes = (values.cpHours || 0) * 60 + (values.cpMinutes || 0);
 
-  const downtimeMinutes =
-    (values.downHours || 0) * 60 + (values.downMinutes || 0);
+  // const downtimeMinutes =
+  //   (values.downHours || 0) * 60 + (values.downMinutes || 0);
 
   return (
     <section>

@@ -1,8 +1,6 @@
-import DefaultLayout from "@/layouts/default";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Divider } from "@heroui/divider";
 import { useEffect, useState } from "react";
-import Overview from "@/components/sections/overview";
 import BihonProduction from "@/components/sections/bihon-production";
 import CantonProduction from "@/components/sections/canton-production";
 
