@@ -177,7 +177,7 @@ export default function BihonProduction() {
             <Input
               label="Minutes"
               type="number"
-              onValueChange={(v) => setNumber("ipMinutes", v)}
+              onValueChange={(v) => setNumber("ipMins", v)}
             />
           </div>
         </div>
@@ -193,7 +193,7 @@ export default function BihonProduction() {
             <Input
               label="Minutes"
               type="number"
-              onValueChange={(v) => setNumber("cpMinutes", v)}
+              onValueChange={(v) => setNumber("cpMins", v)}
             />
           </div>
         </div>
