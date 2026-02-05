@@ -199,17 +199,17 @@ export default function BihonProduction() {
         </div>
 
         <div>
-          <p>Downtime</p>
+          <p>Machine Trouble</p>
           <div className="flex gap-2">
             <Input
               label="Hours"
               type="number"
-              onValueChange={(v) => setNumber("downHours", v)}
+              onValueChange={(v) => setNumber("mtHours", v)}
             />
             <Input
               label="Minutes"
               type="number"
-              onValueChange={(v) => setNumber("downMinutes", v)}
+              onValueChange={(v) => setNumber("mtMins", v)}
             />
           </div>
         </div>
@@ -257,14 +257,14 @@ export default function BihonProduction() {
           />
         </div>
 
-        <div>
+        {/* <div>
           <Input
             label="Machine Trouble (count)"
             type="number"
             className="w-full"
             onValueChange={(v) => setNumber("machineTrouble", v)}
           />
-        </div>
+        </div> */}
 
         <div className="">
           <Textarea
