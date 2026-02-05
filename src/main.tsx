@@ -10,7 +10,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter basename="/ppoms">
       <Provider>
-        <App />
+        <main className="dark text-foreground bg-background p-4">
+          <div className="max-w-5xl mx-auto">
+            <App />
+          </div>
+        </main>
       </Provider>
     </BrowserRouter>
   </React.StrictMode>,

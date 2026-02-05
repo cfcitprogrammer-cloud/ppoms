@@ -1,40 +1,50 @@
-import { Input, Textarea } from "@heroui/input";
-import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
 import { Form } from "@heroui/form";
+import { Input, Textarea } from "@heroui/input";
+import axios from "axios";
 import { FormEvent, useState } from "react";
-
-interface PackingItem {
-  name: string;
-  quantity: string;
-  weight: string;
-}
+import { GAS_DEPLOYMENT_LINK } from "../../../link";
+import { addToast } from "@heroui/toast";
+import { Button } from "@heroui/button";
+import { Spinner } from "@heroui/spinner";
 
 export default function CantonProduction() {
-  const [action, setAction] = useState<string | null>(null);
-  const [packingItems, setPackingItems] = useState<PackingItem[]>([]);
-  const [itemName, setItemName] = useState("");
-  const [itemQuantity, setItemQuantity] = useState("");
-  const [itemWeight, setItemWeight] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    console.log("Submitted Packing Items:", packingItems);
-  }
 
-  function addPackingItem() {
-    if (!itemName || !itemQuantity || !itemWeight) return;
-    setPackingItems([
-      ...packingItems,
-      { name: itemName, quantity: itemQuantity, weight: itemWeight },
-    ]);
-    setItemName("");
-    setItemQuantity("");
-    setItemWeight("");
-  }
+    setLoading(true);
 
-  function removePackingItem(index: number) {
-    setPackingItems(packingItems.filter((_, i) => i !== index));
+    // Create a FormData object from the form
+    const formData = new FormData(e.currentTarget);
+
+    // Convert FormData to a plain object
+    const data = Object.fromEntries(formData.entries());
+
+    console.log(data);
+
+    try {
+      const res = await axios.post(
+        GAS_DEPLOYMENT_LINK,
+        JSON.stringify({
+          action: "set-canton-prod",
+          ...data,
+        }),
+      );
+
+      addToast({
+        title: "Submitted",
+        color: "success",
+      });
+    } catch (error) {
+      addToast({
+        title: "Submission Failed",
+        color: "danger",
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -49,168 +59,243 @@ export default function CantonProduction() {
       <Divider className="my-4" />
 
       <Form
-        onReset={() => setAction("reset")}
         onSubmit={onSubmit}
-        className="grid grid-cols-2 gap-4"
+        className="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
+        {/* ===== Canton Production ===== */}
         <div className="col-span-full">
           <h2 className="font-semibold text-sm">Canton Production</h2>
         </div>
+
         <div>
           <Input
-            errorMessage="Please enter a valid value"
             label="Flour Used"
             name="flour"
-            placeholder="in kg"
-            type="text"
+            step={"any"}
+            type="number"
             size="sm"
           />
-          <p className="text-xs mt-2">Current: {0} kgs</p>
-        </div>
-        <div>
-          <Textarea
-            className="max-w-full"
-            label="Note"
-            placeholder="Enter your additional notes"
-          />
-        </div>
-        <div className="col-span-full">
-          <h2 className="font-semibold text-sm">Troubles</h2>
-        </div>
-        <div>
-          <Textarea
-            className="max-w-full"
-            label="Machine Trouble"
-            placeholder="Enter your description"
-          />
-        </div>
-        <div className="col-span-full">
-          <h2 className="font-semibold text-sm">Canton Packing</h2>
-        </div>
-        <div className="col-span-full">
-          <h2 className="font-semibold text-sm">Canton Packing</h2>
-        </div>
-        {/* Packing Item Inputs */}
-        <div>
-          <Input
-            label="Item Name"
-            placeholder="e.g., Canton tartrazine 454g x 12"
-            value={itemName}
-            onChange={(e) => setItemName(e.target.value)}
-            size="sm"
-          />
-        </div>
-        <div>
-          <Input
-            label="Quantity / Bundles"
-            placeholder="e.g., 154 bdls"
-            value={itemQuantity}
-            onChange={(e) => setItemQuantity(e.target.value)}
-            size="sm"
-          />
-        </div>
-        <div>
-          <Input
-            label="Weight (kgs)"
-            placeholder="e.g., 838.992 kgs"
-            value={itemWeight}
-            onChange={(e) => setItemWeight(e.target.value)}
-            size="sm"
-          />
-        </div>
-        <div className="col-span-full mt-2">
-          <Button type="button" color="primary" onClick={addPackingItem}>
-            Add Item
-          </Button>
-        </div>
-        {/* List of Added Packing Items */}
-        {packingItems.length > 0 && (
-          <div className="col-span-full mt-4">
-            <h3 className="font-semibold text-sm mb-2">Packing Items List</h3>
-            <ul className="list-disc ml-5 space-y-1">
-              {packingItems.map((item, index) => (
-                <li key={index} className="flex justify-between items-center">
-                  <span>
-                    {item.name} - {item.quantity} ({item.weight})
-                  </span>
-                  <Button
-                    type="button"
-                    color="danger"
-                    size="sm"
-                    onPress={() => removePackingItem(index)}
-                  >
-                    Remove
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <div>
-          <p>Total Output: {0} kgs</p>
-          <p>Current Total Output: {0} kgs</p>
-        </div>
-
-        <div>
-          <p>Yield: {0} %</p>
-          <p>Current Yield {0} %</p>
-        </div>
-
-        <div className="col-span-full">
-          <h2 className="font-semibold text-sm">Packing Rejections</h2>
         </div>
 
         <div>
           <Input
-            errorMessage="Please enter a valid value"
+            label="Total Input"
+            name="totalInput"
+            step={"any"}
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div className="col-span-full">
+          <h2 className="font-semibold text-sm">Packing Rejection</h2>
+        </div>
+
+        <div>
+          <Input
             label="Scrap"
             name="scrap"
-            placeholder="in kg"
-            type="text"
+            step={"any"}
+            type="number"
             size="sm"
           />
-          <p className="text-xs mt-2">Current: {0} kgs</p>
         </div>
 
         <div>
           <Input
-            errorMessage="Please enter a valid value"
             label="Sweepings"
+            step={"any"}
             name="sweepings"
-            placeholder="in kg"
-            type="text"
+            type="number"
             size="sm"
           />
-          <p className="text-xs mt-2">Current: {0} kgs</p>
-        </div>
-
-        <div>
-          <Input
-            errorMessage="Please enter a valid value"
-            label="Percentage"
-            name="percentage"
-            placeholder="in kg"
-            type="text"
-            size="sm"
-          />
-          <p className="text-xs mt-2">Current: {0} %</p>
         </div>
 
         <div className="col-span-full">
-          <h2 className="font-semibold text-sm">Lines Running</h2>
+          <h2 className="font-semibold text-sm">Machine Trouble</h2>
         </div>
 
         <div>
-          <Textarea
-            className="max-w-full"
-            label="Lines Running"
-            placeholder="*3 Lines running (1, 3, & 5)"
+          <Input
+            label="Machine Trouble"
+            name="machineTrouble"
+            type="number"
+            size="sm"
           />
         </div>
 
-        <footer className="col-span-full">
-          <Button className="w-full">Submit</Button>
+        <Textarea
+          label="Trouble"
+          name="trouble"
+          placeholder="Describe machine or production issues"
+        />
+
+        <div className="col-span-full">
+          <h2 className="font-semibold text-sm">Canton Packing</h2>
+        </div>
+
+        <div className="col-span-full">
+          <h3 className="font-semibold text-sm">Canton tartrazine 454g x 12</h3>
+        </div>
+
+        <div>
+          <Input
+            label="KGS"
+            step={"any"}
+            name="itm1KGS"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div>
+          <Input
+            label="QTY"
+            step={"any"}
+            name="itm1QTY"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div className="col-span-full">
+          <h3 className="font-semibold text-sm">
+            Canton tartrazine 227g - BDLS
+          </h3>
+        </div>
+
+        <div>
+          <Input
+            label="KGS"
+            step={"any"}
+            name="itm2KGS"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div>
+          <Input
+            label="QTY"
+            step={"any"}
+            name="itm2QTY"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div className="col-span-full">
+          <h3 className="font-semibold text-sm">
+            Canton tartrazine 227g - PCS
+          </h3>
+        </div>
+
+        <div>
+          <Input
+            label="KGS"
+            step={"any"}
+            name="itm3KGS"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div>
+          <Input
+            label="QTY"
+            step={"any"}
+            name="itm3QTY"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div className="col-span-full">
+          <h3 className="font-semibold text-sm">Chow mee 400g x 5</h3>
+        </div>
+
+        <div>
+          <Input
+            label="KGS"
+            step={"any"}
+            name="itm4KGS"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div>
+          <Input
+            label="QTY"
+            step={"any"}
+            name="itm4QTY"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div className="col-span-full">
+          <h3 className="font-semibold text-sm">Rapsa canton x 1 kilo</h3>
+        </div>
+
+        <div>
+          <Input
+            label="KGS"
+            step={"any"}
+            name="itm5KGS"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div>
+          <Input
+            label="QTY"
+            step={"any"}
+            name="itm5QTY"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div className="col-span-full">
+          <h3 className="font-semibold text-sm">
+            Pancit canton loose 454g x 5-packs
+          </h3>
+        </div>
+
+        <div>
+          <Input
+            label="KGS"
+            step={"any"}
+            name="itm6KGS"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <div>
+          <Input
+            label="QTY"
+            step={"any"}
+            name="itm6QTY"
+            type="number"
+            size="sm"
+          />
+        </div>
+
+        <Textarea label="Remarks" name="remarks" placeholder="Remarks" />
+
+        <Textarea
+          label="Lines Running"
+          name="linesRunning"
+          placeholder="Lines Running"
+        />
+
+        <footer>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? <Spinner /> : "Submit"}
+          </Button>
         </footer>
       </Form>
     </section>

@@ -2,17 +2,79 @@ import { Divider } from "@heroui/divider";
 import { Form } from "@heroui/form";
 import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
-
+import { Select, SelectItem } from "@heroui/select";
 import { FormEvent, useState } from "react";
+import axios from "axios";
+import { GAS_DEPLOYMENT_LINK } from "../../../link";
+import { Spinner } from "@heroui/spinner";
+import { addToast } from "@heroui/toast";
 
 export default function BihonProduction() {
-  const [action, setAction] = useState<string | null>(null);
+  /* ===== State ===== */
+  const [values, setValues] = useState<Record<string, number>>({});
+  const [linesRunning, setLinesRunning] = useState("");
+  const [trouble, setTrouble] = useState("");
+  const [shift, setShift] = useState("Day Shift");
+  const [loading, setLoading] = useState(false);
 
-  function onSubmit(e: FormEvent) {
+  function setNumber(name: string, value: string) {
+    setValues((prev) => ({
+      ...prev,
+      [name]: Number(value || 0),
+    }));
+  }
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    alert("On Submit");
+    setLoading(true);
+
+    try {
+      const res = await axios.post(
+        GAS_DEPLOYMENT_LINK,
+        JSON.stringify({
+          action: "set-bihon-prod",
+          ...values,
+          linesRunning,
+          troubleNotes: trouble,
+          shift,
+        }),
+      );
+
+      addToast({
+        title: "Submitted",
+        color: "success",
+      });
+    } catch (error) {
+      addToast({
+        title: "Submission Failed",
+        color: "danger",
+      });
+    } finally {
+      setLoading(false);
+    }
   }
+
+  /* ===== Derived values ===== */
+  const cornstarch = values.cornstarch || 0;
+  const reworks = values.reworks || 0;
+  const totalInput = cornstarch + reworks;
+
+  const localOutput = values.localOutput || 0;
+  const exportOutput = values.exportOutput || 0;
+  const totalOutput = localOutput + exportOutput;
+
+  const trimmings = values.trimmings || 0;
+  const rejects = values.rejects || 0;
+  const sweepings = values.sweepings || 0;
+  const totalRejects = trimmings + rejects + sweepings;
+
+  const invertingMinutes = (values.ipHours || 0) * 60 + (values.ipMinutes || 0);
+
+  const changingMinutes = (values.cpHours || 0) * 60 + (values.cpMinutes || 0);
+
+  const downtimeMinutes =
+    (values.downHours || 0) * 60 + (values.downMinutes || 0);
 
   return (
     <section>
@@ -26,234 +88,197 @@ export default function BihonProduction() {
       <Divider className="my-4" />
 
       <Form
-        onReset={() => setAction("reset")}
         onSubmit={onSubmit}
-        className="grid grid-cols-2 gap-4"
+        className="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
+        {/* ===== BH Production ===== */}
         <div className="col-span-full">
           <h2 className="font-semibold text-sm">BH Production</h2>
         </div>
 
         <div>
           <Input
-            errorMessage="Please enter a valid value"
             label="Cornstarch Used"
-            name="cornstarch"
-            placeholder="in kg"
-            type="text"
-            size="sm"
+            type="number"
+            step={"any"}
+            onValueChange={(v) => setNumber("cornstarch", v)}
           />
-          <p className="text-xs mt-2">Current: {0} kgs</p>
+        </div>
+
+        <div>
+          <Select
+            className="w-full"
+            label="Select shift"
+            value={shift}
+            onChange={(e) => setShift(e.target.value)}
+          >
+            <SelectItem key="Day Shift">Day Shift</SelectItem>
+            <SelectItem key="Night Shift">Night Shift</SelectItem>
+          </Select>
         </div>
 
         <div>
           <Input
-            errorMessage="Please enter a valid value"
             label="Reworks Used"
-            name="reworks"
-            placeholder="in kg"
-            type="text"
-            size="sm"
+            type="number"
+            step={"any"}
+            onValueChange={(v) => setNumber("reworks", v)}
           />
-          <p className="text-xs mt-2">Current: {0} kgs</p>
         </div>
 
-        <div>
+        <div className="col-span-full">
           <p className="text-sm">
-            <strong className="font-semibold">Total Input to be added:</strong>{" "}
-            {0} kgs
+            <strong>Total Input:</strong> {totalInput} kgs
           </p>
         </div>
 
-        <div className="col-span-full">
-          <h2 className="font-semibold text-sm">Troubles</h2>
-        </div>
-
-        <div>
-          <Input
-            errorMessage="Please enter a valid value"
-            label="Machine Trouble"
-            name="machine-trouble"
-            placeholder="0"
-            type="text"
-            size="sm"
-          />
-
-          <p className="text-xs mt-2">Current: {0}</p>
-        </div>
-
-        <div>
-          <Textarea
-            className="max-w-full"
-            label="Additional Information"
-            placeholder="Enter your description"
-          />
-        </div>
-
-        <div className="col-span-full">
-          <h2 className="font-semibold text-sm">Total Hours</h2>
-        </div>
-
-        <div>
-          <p>Inverting Plate</p>
-
-          <div className="flex gap-2">
-            <Input
-              errorMessage="Please enter a valid value"
-              label="Hour/s"
-              name="ip-hrs"
-              placeholder="0"
-              type="text"
-              size="sm"
-            />
-
-            <Input
-              errorMessage="Please enter a valid value"
-              label="Minute/s"
-              name="ip-mins"
-              placeholder="0"
-              type="text"
-              size="sm"
-            />
-          </div>
-
-          <p className="text-xs mt-2">Current: {0}</p>
-        </div>
-
-        <div>
-          <p>Changing Plate</p>
-
-          <div className="flex gap-2">
-            <Input
-              errorMessage="Please enter a valid value"
-              label="Hour/s"
-              name="ip-hrs"
-              placeholder="0"
-              type="text"
-              size="sm"
-            />
-
-            <Input
-              errorMessage="Please enter a valid value"
-              label="Minute/s"
-              name="ip-mins"
-              placeholder="0"
-              type="text"
-              size="sm"
-            />
-          </div>
-
-          <p className="text-xs mt-2">Current: {0}</p>
-        </div>
-
-        <div>
-          <p>Downtime</p>
-
-          <div className="flex gap-2">
-            <Input
-              errorMessage="Please enter a valid value"
-              label="Hour/s"
-              name="ip-hrs"
-              placeholder="0"
-              type="text"
-              size="sm"
-            />
-
-            <Input
-              errorMessage="Please enter a valid value"
-              label="Minute/s"
-              name="ip-mins"
-              placeholder="0"
-              type="text"
-              size="sm"
-            />
-          </div>
-
-          <p className="text-xs mt-2">Current: {0}</p>
-        </div>
-
+        {/* ===== BH Packing ===== */}
         <div className="col-span-full">
           <h2 className="font-semibold text-sm">BH Packing</h2>
         </div>
 
         <div>
           <Input
-            errorMessage="Please enter a valid value"
             label="Local Output"
-            name="bh-local-output"
-            placeholder="in kg"
-            type="text"
-            size="sm"
+            type="number"
+            step={"any"}
+            onValueChange={(v) => setNumber("localOutput", v)}
           />
-          <p className="text-xs mt-2">Current: {0} kgs</p>
         </div>
 
         <div>
           <Input
-            errorMessage="Please enter a valid value"
             label="Export Output"
-            name="bh-local-output"
-            placeholder="in kg"
-            type="text"
-            size="sm"
+            type="number"
+            step={"any"}
+            onValueChange={(v) => setNumber("exportOutput", v)}
           />
-          <p className="text-xs mt-2">Current: {0} kgs</p>
         </div>
 
+        <div className="col-span-full">
+          <p className="text-sm">
+            <strong>Total Output:</strong> {totalOutput} kgs
+          </p>
+        </div>
+
+        {/* ===== Total Hours ===== */}
+        <div className="col-span-full">
+          <h2 className="font-semibold text-sm">Total Hours</h2>
+        </div>
+
+        <div>
+          <p>Inverting Plate</p>
+          <div className="flex gap-2">
+            <Input
+              label="Hours"
+              type="number"
+              onValueChange={(v) => setNumber("ipHours", v)}
+            />
+            <Input
+              label="Minutes"
+              type="number"
+              onValueChange={(v) => setNumber("ipMinutes", v)}
+            />
+          </div>
+        </div>
+
+        <div>
+          <p>Changing Plate</p>
+          <div className="flex gap-2">
+            <Input
+              label="Hours"
+              type="number"
+              onValueChange={(v) => setNumber("cpHours", v)}
+            />
+            <Input
+              label="Minutes"
+              type="number"
+              onValueChange={(v) => setNumber("cpMinutes", v)}
+            />
+          </div>
+        </div>
+
+        <div>
+          <p>Downtime</p>
+          <div className="flex gap-2">
+            <Input
+              label="Hours"
+              type="number"
+              onValueChange={(v) => setNumber("downHours", v)}
+            />
+            <Input
+              label="Minutes"
+              type="number"
+              onValueChange={(v) => setNumber("downMinutes", v)}
+            />
+          </div>
+        </div>
+
+        {/* ===== Packing Rejections ===== */}
         <div className="col-span-full">
           <h2 className="font-semibold text-sm">Packing Rejections</h2>
         </div>
 
         <div>
           <Input
-            errorMessage="Please enter a valid value"
             label="Trimmings"
-            name="trimmings"
-            placeholder="in kg"
-            type="text"
-            size="sm"
+            type="number"
+            step={"any"}
+            onValueChange={(v) => setNumber("trimmings", v)}
           />
-          <p className="text-xs mt-2">Current: {0} kgs</p>
         </div>
 
         <div>
           <Input
-            errorMessage="Please enter a valid value"
             label="Rejects"
-            name="rejects"
-            placeholder="in kg"
-            type="text"
-            size="sm"
+            type="number"
+            step={"any"}
+            onValueChange={(v) => setNumber("rejects", v)}
           />
-          <p className="text-xs mt-2">Current: {0} kgs</p>
         </div>
 
         <div>
           <Input
-            errorMessage="Please enter a valid value"
             label="Sweepings"
-            name="sweepings"
-            placeholder="in kg"
-            type="text"
-            size="sm"
+            type="number"
+            step={"any"}
+            onValueChange={(v) => setNumber("sweepings", v)}
           />
-          <p className="text-xs mt-2">Current: {0} kgs</p>
+          <p className="text-xs mt-2">Total Rejects: {totalRejects} kgs</p>
         </div>
 
+        {/* ===== Notes ===== */}
         <div className="col-span-full">
-          <h2 className="font-semibold text-sm">Lines Running</h2>
-        </div>
-
-        <div>
           <Textarea
-            className="max-w-full"
             label="Lines Running"
             placeholder="*3 Lines running (1, 3, & 5)"
+            value={linesRunning}
+            onValueChange={setLinesRunning}
+          />
+        </div>
+
+        <div>
+          <Input
+            label="Machine Trouble (count)"
+            type="number"
+            className="w-full"
+            onValueChange={(v) => setNumber("machineTrouble", v)}
+          />
+        </div>
+
+        <div className="">
+          <Textarea
+            label="Trouble"
+            placeholder="Describe machine or production issues"
+            value={trouble}
+            onValueChange={setTrouble}
           />
         </div>
 
         <footer className="col-span-full">
-          <Button className="w-full">Submit</Button>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? <Spinner /> : "Submit"}
+          </Button>
         </footer>
       </Form>
     </section>
