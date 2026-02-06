@@ -14,7 +14,8 @@ export default function BihonProduction() {
   const [values, setValues] = useState<Record<string, number>>({});
   const [linesRunning, setLinesRunning] = useState("");
   const [trouble, setTrouble] = useState("");
-  const [shift, setShift] = useState("Day Shift");
+  const [shift, setShift] = useState("");
+  const [op, setOp] = useState("");
   const [loading, setLoading] = useState(false);
 
   function setNumber(name: string, value: string) {
@@ -38,6 +39,7 @@ export default function BihonProduction() {
           linesRunning,
           troubleNotes: trouble,
           shift,
+          op,
         }),
       );
 
@@ -97,15 +99,6 @@ export default function BihonProduction() {
         </div>
 
         <div>
-          <Input
-            label="Cornstarch Used"
-            type="number"
-            step={"any"}
-            onValueChange={(v) => setNumber("cornstarch", v)}
-          />
-        </div>
-
-        <div>
           <Select
             className="w-full"
             label="Select shift"
@@ -115,6 +108,27 @@ export default function BihonProduction() {
             <SelectItem key="Day Shift">Day Shift</SelectItem>
             <SelectItem key="Night Shift">Night Shift</SelectItem>
           </Select>
+        </div>
+
+        <div>
+          <Select
+            className="w-full"
+            label="Operation Type"
+            value={shift}
+            onChange={(e) => setOp(e.target.value)}
+          >
+            <SelectItem key="Start Up">Start Up</SelectItem>
+            <SelectItem key="Last Prod">Last Prod</SelectItem>
+          </Select>
+        </div>
+
+        <div>
+          <Input
+            label="Cornstarch Used"
+            type="number"
+            step={"any"}
+            onValueChange={(v) => setNumber("cornstarch", v)}
+          />
         </div>
 
         <div>

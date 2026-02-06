@@ -1,6 +1,7 @@
 import { Divider } from "@heroui/divider";
 import { Form } from "@heroui/form";
 import { Input, Textarea } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select"; // ✅ HeroUI Select
 import axios from "axios";
 import { FormEvent, useState } from "react";
 import { GAS_DEPLOYMENT_LINK } from "../../../link";
@@ -11,18 +12,36 @@ import { Spinner } from "@heroui/spinner";
 export default function CantonProduction() {
   const [loading, setLoading] = useState(false);
 
+  // State for dynamic SKUs, including unit
+  const [skus, setSkus] = useState<
+    { id: number; name: string; kgs: string; qty: string; unit: string }[]
+  >([
+    {
+      id: 1,
+      name: "Canton tartrazine 454g x 12",
+      kgs: "",
+      qty: "",
+      unit: "bdl",
+    },
+  ]);
+
+  function addSKU() {
+    const nextId = skus.length + 1;
+    setSkus([...skus, { id: nextId, name: "", kgs: "", qty: "", unit: "bdl" }]);
+  }
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     setLoading(true);
 
-    // Create a FormData object from the form
+    // Create FormData from form
     const formData = new FormData(e.currentTarget);
 
-    // Convert FormData to a plain object
+    // Convert to plain object
     const data = Object.fromEntries(formData.entries());
 
-    console.log(data);
+    console.log("Form Submission:", data, "SKUs:", skus);
 
     try {
       await axios.post(
@@ -30,6 +49,7 @@ export default function CantonProduction() {
         JSON.stringify({
           action: "set-canton-prod",
           ...data,
+          skus,
         }),
       );
 
@@ -130,160 +150,88 @@ export default function CantonProduction() {
           placeholder="Describe machine or production issues"
         />
 
+        {/* ===== Canton Packing - Dynamic SKUs with HeroUI Select ===== */}
         <div className="col-span-full">
           <h2 className="font-semibold text-sm">Canton Packing</h2>
         </div>
 
-        <div className="col-span-full">
-          <h3 className="font-semibold text-sm">Canton tartrazine 454g x 12</h3>
-        </div>
+        {skus.map((sku, index) => (
+          <div
+            key={sku.id}
+            className="grid grid-cols-1 md:grid-cols-4 gap-4 col-span-full"
+          >
+            <div className="col-span-full">
+              <Input
+                label="SKU Name"
+                name={`skuName_${sku.id}`}
+                value={sku.name}
+                onChange={(e) => {
+                  const newSkus = [...skus];
+                  newSkus[index].name = e.target.value;
+                  setSkus(newSkus);
+                }}
+                size="sm"
+              />
+            </div>
 
-        <div>
-          <Input
-            label="KGS"
-            step={"any"}
-            name="itm1KGS"
-            type="number"
-            size="sm"
-          />
-        </div>
+            <div>
+              <Input
+                label="KGS"
+                step={"any"}
+                name={`skuKGS_${sku.id}`}
+                value={sku.kgs}
+                onChange={(e) => {
+                  const newSkus = [...skus];
+                  newSkus[index].kgs = e.target.value;
+                  setSkus(newSkus);
+                }}
+                type="number"
+                size="sm"
+              />
+            </div>
 
-        <div>
-          <Input
-            label="QTY"
-            step={"any"}
-            name="itm1QTY"
-            type="number"
-            size="sm"
-          />
-        </div>
+            <div>
+              <Input
+                label="QTY"
+                step={"any"}
+                name={`skuQTY_${sku.id}`}
+                value={sku.qty}
+                onChange={(e) => {
+                  const newSkus = [...skus];
+                  newSkus[index].qty = e.target.value;
+                  setSkus(newSkus);
+                }}
+                type="number"
+                size="sm"
+              />
+            </div>
 
-        <div className="col-span-full">
-          <h3 className="font-semibold text-sm">
-            Canton tartrazine 227g - BDLS
-          </h3>
-        </div>
+            <div>
+              <Select
+                label="Unit"
+                size="sm"
+                className="w-full"
+                value={sku.unit} // controlled value
+                onChange={(e) => {
+                  const newSkus = [...skus];
+                  newSkus[index].unit = e.target.value; // get value from event
+                  setSkus(newSkus);
+                }}
+              >
+                <SelectItem key="bdl">bdl</SelectItem>
+                <SelectItem key="pcs">pcs</SelectItem>
+                <SelectItem key="pack">pack</SelectItem>
+                <SelectItem key="case">case</SelectItem>
+              </Select>
+            </div>
+          </div>
+        ))}
 
-        <div>
-          <Input
-            label="KGS"
-            step={"any"}
-            name="itm2KGS"
-            type="number"
-            size="sm"
-          />
-        </div>
+        <Button type="button" onClick={addSKU} className="mt-2 col-span-full">
+          Add SKU
+        </Button>
 
-        <div>
-          <Input
-            label="QTY"
-            step={"any"}
-            name="itm2QTY"
-            type="number"
-            size="sm"
-          />
-        </div>
-
-        <div className="col-span-full">
-          <h3 className="font-semibold text-sm">
-            Canton tartrazine 227g - PCS
-          </h3>
-        </div>
-
-        <div>
-          <Input
-            label="KGS"
-            step={"any"}
-            name="itm3KGS"
-            type="number"
-            size="sm"
-          />
-        </div>
-
-        <div>
-          <Input
-            label="QTY"
-            step={"any"}
-            name="itm3QTY"
-            type="number"
-            size="sm"
-          />
-        </div>
-
-        <div className="col-span-full">
-          <h3 className="font-semibold text-sm">Chow mee 400g x 5</h3>
-        </div>
-
-        <div>
-          <Input
-            label="KGS"
-            step={"any"}
-            name="itm4KGS"
-            type="number"
-            size="sm"
-          />
-        </div>
-
-        <div>
-          <Input
-            label="QTY"
-            step={"any"}
-            name="itm4QTY"
-            type="number"
-            size="sm"
-          />
-        </div>
-
-        <div className="col-span-full">
-          <h3 className="font-semibold text-sm">Rapsa canton x 1 kilo</h3>
-        </div>
-
-        <div>
-          <Input
-            label="KGS"
-            step={"any"}
-            name="itm5KGS"
-            type="number"
-            size="sm"
-          />
-        </div>
-
-        <div>
-          <Input
-            label="QTY"
-            step={"any"}
-            name="itm5QTY"
-            type="number"
-            size="sm"
-          />
-        </div>
-
-        <div className="col-span-full">
-          <h3 className="font-semibold text-sm">
-            Pancit canton loose 454g x 5-packs
-          </h3>
-        </div>
-
-        <div>
-          <Input
-            label="KGS"
-            step={"any"}
-            name="itm6KGS"
-            type="number"
-            size="sm"
-          />
-        </div>
-
-        <div>
-          <Input
-            label="QTY"
-            step={"any"}
-            name="itm6QTY"
-            type="number"
-            size="sm"
-          />
-        </div>
-
+        {/* ===== Remarks & Lines Running ===== */}
         <Textarea label="Remarks" name="remarks" placeholder="Remarks" />
 
         <Textarea
@@ -292,7 +240,7 @@ export default function CantonProduction() {
           placeholder="Lines Running"
         />
 
-        <footer>
+        <footer className="col-span-full">
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? <Spinner /> : "Submit"}
           </Button>
