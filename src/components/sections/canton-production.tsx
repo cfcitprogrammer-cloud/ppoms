@@ -41,7 +41,30 @@ export default function CantonProduction() {
     // Convert to plain object
     const data = Object.fromEntries(formData.entries());
 
-    console.log("Form Submission:", data, "SKUs:", skus);
+    const totalOutput = skus.reduce(
+      (sum, sku) => sum + (parseFloat(sku.kgs) || 0),
+      0
+    );
+
+    const totalInput = parseFloat(data["totalInput"] as string) || 0;
+
+    const yieldValue = totalInput ? (totalOutput / totalInput) * 100 : 0;
+
+    const rejectionPercent = totalOutput
+      ? (((parseFloat(data["sweepings"] as string) || 0) +
+          (parseFloat(data["scrap"] as string) || 0)) /
+          totalOutput) *
+        100
+      : 0;
+
+    console.log({
+      action: "set-canton-prod",
+      ...data,
+      skus,
+      totalOutput,
+      yieldValue,
+      rejectionPercent,
+    });
 
     try {
       await axios.post(
@@ -50,7 +73,10 @@ export default function CantonProduction() {
           action: "set-canton-prod",
           ...data,
           skus,
-        }),
+          totalOutput,
+          yieldValue,
+          rejectionPercent,
+        })
       );
 
       addToast({
