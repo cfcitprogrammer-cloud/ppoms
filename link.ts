@@ -1,2 +1,2 @@
 export const GAS_DEPLOYMENT_LINK =
-  "https://script.google.com/macros/s/AKfycbxjgh4lqrxrBzadEMv00ZZHKzlBnPxqWhYRVUfCcePmjpbaLuRXf-TJO7e0dSQrug2a/exec";
+  "https://script.google.com/macros/s/AKfycbxA-7xsDupkxdG14vH0VMilaWHDzHcY1FZCHSVL9_HxpuJy3UMXrJ63Y_MzW01gCXk/exec";
