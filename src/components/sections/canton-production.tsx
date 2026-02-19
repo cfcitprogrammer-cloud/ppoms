@@ -8,9 +8,12 @@ import { GAS_DEPLOYMENT_LINK } from "../../../link";
 import { addToast } from "@heroui/toast";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
+import { DatePicker } from "@heroui/date-picker";
+import { getLocalTimeZone, today } from "@internationalized/date";
 
 export default function CantonProduction() {
   const [loading, setLoading] = useState(false);
+  const [date, setDate] = useState(today(getLocalTimeZone()));
 
   // State for dynamic SKUs, including unit
   const [skus, setSkus] = useState<
@@ -43,7 +46,7 @@ export default function CantonProduction() {
 
     const totalOutput = skus.reduce(
       (sum, sku) => sum + (parseFloat(sku.kgs) || 0),
-      0
+      0,
     );
 
     const totalInput = parseFloat(data["totalInput"] as string) || 0;
@@ -64,6 +67,7 @@ export default function CantonProduction() {
       totalOutput,
       yieldValue,
       rejectionPercent,
+      date,
     });
 
     try {
@@ -76,7 +80,8 @@ export default function CantonProduction() {
           totalOutput,
           yieldValue,
           rejectionPercent,
-        })
+          date: date.toString(),
+        }),
       );
 
       addToast({
@@ -111,6 +116,17 @@ export default function CantonProduction() {
         {/* ===== Canton Production ===== */}
         <div className="col-span-full">
           <h2 className="font-semibold text-sm">Canton Production</h2>
+        </div>
+
+        <div>
+          <DatePicker
+            className="w-full"
+            label="Select date"
+            value={date}
+            onChange={(value) => {
+              if (value) setDate(value);
+            }}
+          />
         </div>
 
         <div>

@@ -8,6 +8,8 @@ import axios from "axios";
 import { GAS_DEPLOYMENT_LINK } from "../../../link";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
+import { DatePicker } from "@heroui/date-picker";
+import { getLocalTimeZone, today } from "@internationalized/date";
 
 export default function BihonProduction() {
   /* ===== State ===== */
@@ -16,7 +18,9 @@ export default function BihonProduction() {
   const [trouble, setTrouble] = useState("");
   const [shift, setShift] = useState("");
   const [op, setOp] = useState("");
+  const [date, setDate] = useState(today(getLocalTimeZone()));
   const [loading, setLoading] = useState(false);
+  const [remarks, setRemarks] = useState("");
 
   function setNumber(name: string, value: string) {
     setValues((prev) => ({
@@ -30,6 +34,8 @@ export default function BihonProduction() {
 
     setLoading(true);
 
+    console.log(date);
+
     try {
       await axios.post(
         GAS_DEPLOYMENT_LINK,
@@ -40,6 +46,8 @@ export default function BihonProduction() {
           troubleNotes: trouble,
           shift,
           op,
+          date: date.toString(),
+          remarks,
         }),
       );
 
@@ -96,6 +104,17 @@ export default function BihonProduction() {
         {/* ===== BH Production ===== */}
         <div className="col-span-full">
           <h2 className="font-semibold text-sm">BH Production</h2>
+        </div>
+
+        <div>
+          <DatePicker
+            className="w-full"
+            label="Select date"
+            value={date}
+            onChange={(value) => {
+              if (value) setDate(value);
+            }}
+          />
         </div>
 
         <div>
@@ -286,6 +305,15 @@ export default function BihonProduction() {
             placeholder="Describe machine or production issues"
             value={trouble}
             onValueChange={setTrouble}
+          />
+        </div>
+
+        <div className="">
+          <Textarea
+            label="Remarks"
+            placeholder="Any additional remarks"
+            value={remarks}
+            onValueChange={setRemarks}
           />
         </div>
 
