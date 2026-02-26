@@ -3,6 +3,8 @@ import { Divider } from "@heroui/divider";
 import { useEffect, useState } from "react";
 import BihonProduction from "@/components/sections/bihon-production";
 import CantonProduction from "@/components/sections/canton-production";
+import SF1 from "@/components/sections/sf1";
+import SF2 from "@/components/sections/sf2";
 
 export default function IndexPage() {
   const [isDesktop, setIsDesktop] = useState(false);
@@ -43,6 +45,14 @@ export default function IndexPage() {
 
         <Tab key="canton-production" title="Canton">
           <CantonProduction />
+        </Tab>
+
+        <Tab key="sf1" title="SF 1">
+          <SF1 />
+        </Tab>
+
+        <Tab key="sf2" title="SF 2">
+          <SF2 />
         </Tab>
       </Tabs>
     </div>
